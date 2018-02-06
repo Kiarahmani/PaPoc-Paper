@@ -1,0 +1,23 @@
+\begin{figure}[h]
+\centering
+\begin{scriptsize}
+\begin{tabular}{|l | c |}
+\hline
+ { \texttt Guarantee} & {\texttt Contract} \\ [0.5ex]
+\hline
+{\tiny \textsc{Read My Writes (RMW)}} & $\forall a. a ~  ~\xrightarrow{\soZ}  ~ ~
+\hat{\eta} \Rightarrow a \xrightarrow{\visZ} \hat{\eta} $ \\
+{\tiny \textsc{Monotonic Writes (MW)}} & $\forall a. a \xrightarrow{\soZ;\visZ}
+\hat{\eta} \Rightarrow a \xrightarrow{\visZ} \hat{\eta} $ \\
+{\tiny \textsc{Monotonic Reads (MR)}} & $\forall a. a \xrightarrow{\visZ;\soZ}
+\hat{\eta} \Rightarrow a \xrightarrow{\visZ} \hat{\eta} $ \\
+{\tiny \textsc{Transitive Visibility (2VIS)}} & $\forall a. a \xrightarrow{\visZ;\visZ}
+\hat{\eta} \Rightarrow a \xrightarrow{\visZ} \hat{\eta} $ \\
+
+\hline
+\end{tabular}
+\end{scriptsize}
+\caption{Contract Examples}
+\label{fig:ctrt_example}
+
+\end{figure}

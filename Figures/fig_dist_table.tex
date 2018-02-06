@@ -1,0 +1,83 @@
+\begin{figure}[h]
+\centering
+\begin{center}
+\begin{scriptsize}
+\begin{tabular}{|l |  l | l|} 
+\hline
+ \multicolumn{1}{|c}  {\bf Benchmark} & \multicolumn{1}{c} {\bf
+ Consistency} & \multicolumn{1}{c|}  {\bf
+ Description}\\ [0.5ex] 
+\hline
+Counter  & MR & {\tiny
+ \begin{tabular}[c]{@{}l@{}} Monotonicly increasing counter\\ e.g.
+ YouTubes' watch count \end{tabular} 
+ }\\ \hline
+DynamoDB  & RMW & {
+\tiny
+ \begin{tabular}[c]{@{}l@{}} Integer register allowing\\ various
+ conditional puts\\ and gets \end{tabular} 
+} \\ \hline
+Online Store & RMW &  {
+\tiny
+ \begin{tabular}[c]{@{}l@{}} Online store with shopping\\ carts
+ and modifiable\\  item prices \end{tabular} 
+} \\ \hline
+Bankaccount  & 2VIS $\wedge$ RMW & {
+\tiny
+ \begin{tabular}[c]{@{}l@{}} Offering deposit, \\ withdraw and get \\ balance
+ operations \end{tabular} 
+}\\ \hline
+Shopping List   &  MW $\wedge$ RMW & {
+ \tiny
+ \begin{tabular}[c]{@{}l@{}} A shopping list with \\ concurrent adds
+	 and\\
+ deletes \end{tabular} 
+}\\ \hline 
+Microblog  &  MW, RMW & {
+ \tiny
+ \begin{tabular}[c]{@{}l@{}} A Twitter-like application \\ modeled after
+ Twissandra \cite{twis}\end{tabular} 
+}\\\hline
+Rubis  & RMW, RMW$\wedge$2VIS & {
+ \tiny
+ \begin{tabular}[c]{@{}l@{}} eBay-like application with \\ browsing,
+ supporting user \\ wallet\end{tabular} 
+} \\
+\hline
+\end{tabular}
+\end{scriptsize}
+\end{center}
+\caption{Fine-grained consistency requirement in benchmark programs}
+\label{fig:dist_table}
+\end{figure}
+
+
+\begin{comment}
+\begin{figure}[b]
+\centering
+\begin{center}
+\begin{scriptsize}
+\begin{tabular}{|l |  l|}    
+\hline
+ \multicolumn{1}{|c}  {\bf Benchmark} & \multicolumn{1}{c|} {\bf
+ Consistency} \\ [0.4ex]                           
+\hline
+Counter  & MR \\ \hline
+DynamoDB  & RMW \\ \hline
+Online Store & RMW \\ \hline
+Bankaccount  & 2VIS $\wedge$ RMW \\ \hline
+Shopping List   &  MW $\wedge$ RMW \\ \hline 
+Microblog  &  MW, RMW \\\hline
+Rubis  & RMW, RMW$\wedge$2VIS \\
+\hline
+\end{tabular}
+\end{scriptsize}
+\end{center}
+\caption{Fine-grained consistency requirement in benchmark programs}
+\label{fig:dist_table}
+\end{figure}
+\end{comment}
+
+
+
+
