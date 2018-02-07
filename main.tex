@@ -39,14 +39,6 @@
 \input{mydefs}
 
 
-% Copyright
-
-%\CopyrightYear{2018} 
-%\setcopyright{acmcopyright}
-%\conferenceinfo{PaPOC'8,}{April 18-21, 2016, London, United Kingdom}
-%\isbn{978-1-4503-4296-4/16/04}\acmPrice{\$15.00}
-%\doi{http://dx.doi.org/10.1145/2911151.2911160}
-
 
 \title{Fine-grained Distributed Consistency Guarantees with Effect
 Orchestration}
@@ -121,6 +113,22 @@ Gowtham Kaki\\
 
 
 \begin{abstract}
+  Highly-available distributed applications
+  typically require data to be replicated over geo-distributed
+  stores that offer weak consistency guarantees by default.
+  Unfortunately, undesirable behaviors may arise under weak
+  consistency that can violate application correctness, forcing
+  designers to either implement complex ad-hoc mechanisms to avoid these
+  anomalies, or choose to run applications using stronger levels of
+  consistency, sacrificing performance. 
+  In this paper, we describe a lightweight runtime system that relieves
+  developers from having to make such tradeoffs.  Instead, our
+  approach leverages \emph{declarative} axiomatic specifications that reflect
+  the necessary constraints any correct implementation must satisfy to
+  guide a runtime consistency enforcement and monitoring mechanism.
+  Experimental results show that the performance of our (provably optimal and safe) automatically
+  derived fine-grained consistency enforcement mechanisms is better than 
+  common store-offered consistency guarantees.
 \end{abstract}
 
 \keywords{Runtime Safety; Weak Consistency; Key-value stores; Haskell}
@@ -140,34 +148,28 @@ Gowtham Kaki\\
 
 Historically, the \emph{de facto} system abstraction for developing distributed
 programs has typically included ACID\footnote{Atomicity, Consistency,
-Isolation and Durability} properties. These properties
-guarantee replication transparency and make it
-straightforward to develop standardized implementation and reasoning
-techniques around \emph{strongly consistent} (SC) distributed stores \cite{papa,lin}.
+Isolation and Durability} properties  \cite{papa,lin}.
+%These properties guarantee replication transparency and make it
+%straightforward to develop standardized implementation and reasoning
+%techniques around \emph{strongly consistent} (SC) distributed stores \cite{papa,lin}.
 However, for web-scale applications that need to be “always-on” even
 in the presence of network partitions, extensive
 synchronization overhead is often unacceptable \cite{cap}.
 Such applications are therefore usually designed to tolerate certain
-inconsistencies, allowing them to adopt weaker notions of consistency
-that impose less synchronization overhead such as \emph{eventual
-consistency} (EC). 
+inconsistencies and thus to be commonly deployed on eventually consistent data stores.
 
-Applications that may not tolerate the level of inconsistency imposed by EC 
-are often equipped with ad-hoc mechanisms to prevent 
-undesirable anomalies allowed in EC stores, where the local state of
-each application server only represents an \emph{unspecified order} of an
-\emph{unspecified subset} of the aggregate collection of all updates
-submitted to the system globally. Unfortunately, such enforcement
-mechanisms are closely tied to the application logic, confounding
-standardization, while complicating application reasoning,
-maintainability, and reusability.
+In order to tolerate the level of inconsistency imposed by eventual consistency (EC), researchers have introduced  
+numerous add-on consistency control mechanisms to equip applications with \cite{terry,lloyd,ahmad,Bailis:2013:HAT,Bailis:2014:RAMP}.
+Unfortunately, such enforcement
+mechanisms are usually closely tied to the application logic, confounding
+standardization and reusability, while complicating application development and maintainability.
 
 In this paper, we propose an alternative approach to weak consistency
 enforcement that circumvents the aforementioned issues. \tool\; is a
 lightweight runtime verification system for Haskell that allows
 application developers to take advantage of weak consistency without
 having to re-engineer their code to accommodate anomaly preemption
-mechanisms by declaratively admitting consistency
+mechanisms, by \emph{declaratively} admitting consistency
 requirements via a specification language.
 
 The remainder of this paper is organized as follows:
@@ -175,7 +177,7 @@ Section 2 introduces our system model and in Section 3 we
 discuss different approaches on distributed consistency enforcement which we
 collectively refer to as \emph{orchestration} techniques. In sections 4 and 5 we present
 evidence for real-world applications requiring fine-grained consistency guarantees and 
-experimental results suggesting the possiblility of performance gain in off-the-shelf datastores deploying fine-grain consistency guarantees using out tool. 
+experimental results suggesting the possibility of performance gain in off-the-shelf datastores deploying fine-grained consistency guarantees by using our tool. 
 We present our conclusions and a review of the related works in section 8.
 %---------------------------------------------------------------------------------------------------------------
 
@@ -228,11 +230,11 @@ operations (even from the same session) might be routed to different replicas (F
 Lastly, we define two relations over effects. 
 Session order (\sor) is an irreflexive, transitive relation that relates an effect
  to all subsequent effects from the same session. Visibility (\visib) is an 
-irreflexive and assymetric relation that relates an effect to all others that are influenced 
+irreflexive and asymetric relation that relates an effect to all others that are influenced 
 by it (i.e., witnesses its update) at the time of their generation. 
 For example, in Fig.\ref{fig:sys_c} \visib($\eta$,$\eta'$) holds, since $\eta$ (the effect of op) 
 has already been delivered and applied to the replica \#4, when op' is 
-executed and thus has influenced generation of $\eta$'.
+executed and thus has influenced the generation of $\eta$'.
 %---------------------------------------------------------------------------------------------------------------
 
 
@@ -258,11 +260,11 @@ executed and thus has influenced generation of $\eta$'.
 %-----------------------
 %SECTION 3
 \section{Effect Orchestration}
-In this section we introduce \tool, a shim-layer for off-the-shelf EC key-value stores, 
+In this section, we introduce \tool, a shim-layer for off-the-shelf EC key-value stores, 
 which extends the basic consistency guarantees offered by them into a vast set of 
 fine-grained guarantees (Fig.~2).
 \tool's design realizes two fundamental classes of run-time procedures on effects and operations, 
-combination of which is necessary to enforce fine-grained consistency requirements in a message-passing distributed system (such as our system model). In the following subsections, we will explain these techniques in detail.
+a combination of which is necessary to enforce fine-grained consistency requirements in a message-passing distributed system (such as our system model). In the following subsections, we will explain these techniques in detail.
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.5]{Figures/shimlayer.pdf}
@@ -271,7 +273,7 @@ combination of which is necessary to enforce fine-grained consistency requiremen
 \end{figure}
 
 \subsection{Blocking}
-\tool's first consistency enforcment technique is called \emph{blocking},
+\tool's first consistency enforcement technique is called \emph{blocking},
 which is a generalized mechanism to stall a user operation until a certain set 
 of \emph{necessary} dependencies of that operation become available at the underlying replica. 
 \tool\; relies on the underlying store for effect propagation which guarantees the eventual delivery of all 
@@ -283,7 +285,7 @@ A use case of this technique is when two operations from the same session are ro
 This can \emph{sometimes} be problematic, e.g. when a user deposits some money into her bank account and then queries the 
 balance. If the effect of the deposit is not available at the replica executing the query, 
 she might think that the bank has stolen her money.
-In this scenario the second operation should be blocked, 
+In this scenario, the second operation should be blocked, 
 until the effect of the deposit operation is delivered to the replica. 
 
 The effects that an operation must wait for, are known as the dependency set of that operation. 
@@ -312,17 +314,18 @@ consistency guarantees in a
 language that is seeded with \sor and \visib relations and define constraints 
 on read operations that can be used to synthesize appropriate filtration  mechanisms.
 
-For example, in a microbloging application where Bob tweets two
+For example, in a microblogging application where Bob tweets two
 consecutive related
 messages $B_1$ and $B_2$, Alice who is connected to a different replica, should not be
 able to read Bob's second message without witnessing the first. 
 Fig.~3 (left) shows this scenario on an unprotected EC system which
-permits this undesired anomaly. The middle and right parts of the figure
+permits this undesired anomaly. The middle and right parts of the
+figure,
 however,
 depict how a simple
-filteration mechanism can prevents Alice from seeing Bob's second
+filtration mechanism can prevents Alice from seeing Bob's second
 message by allowing $B_2$ into the memory only after $B_1$ is also
-available. Even though filteration imposes extra staleness on the
+available. Even though filtration imposes extra staleness on the
 underlying database (e.g. in the middle part of Fig.3), it is very
 effective in eliminating many anomalous behaviors of applications
 running under EC.
@@ -339,7 +342,7 @@ running under EC.
 \subsection{Specification Language}
 The formal syntax of our specification (or contract) language, presented
 in
-Fig.~\ref{fig:ctrt_syntax}, allows definitiosn of
+Fig.~\ref{fig:ctrt_syntax}, allows definitions of
 \propS{}, a first-order formula
 that establishes dependency relations between effects,
 necessary to determine the effects an operation may witness, under
